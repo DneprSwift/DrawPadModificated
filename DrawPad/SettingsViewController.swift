@@ -1,7 +1,7 @@
 import UIKit
 
 protocol SettingsViewControllerDelegate: class {
-  func settingsViewControllerFinished(settingsViewController: SettingsViewController)
+  func settingsViewControllerFinished(_ settingsViewController: SettingsViewController)
 }
 
 class SettingsViewController: UIViewController {
@@ -42,12 +42,12 @@ class SettingsViewController: UIViewController {
     // Dispose of any resources that can be recreated.
   }
 
-  @IBAction func close(sender: AnyObject) {
-    dismissViewControllerAnimated(true, completion: nil)
+  @IBAction func close(_ sender: AnyObject) {
+    dismiss(animated: true, completion: nil)
     self.delegate?.settingsViewControllerFinished(self)
   }
 
-  @IBAction func colorChanged(sender: UISlider) {
+  @IBAction func colorChanged(_ sender: UISlider) {
     red = CGFloat(sliderRed.value / 255.0)
     labelRed.text = NSString(format: "%d", Int(sliderRed.value)) as String
     green = CGFloat(sliderGreen.value / 255.0)
@@ -58,7 +58,7 @@ class SettingsViewController: UIViewController {
     drawPreview()
   }
 
-  @IBAction func sliderChanged(sender: UISlider) {
+  @IBAction func sliderChanged(_ sender: UISlider) {
     if sender == sliderBrush {
       brush = CGFloat(sender.value)
       labelBrush.text = NSString(format: "%.2f", brush.native) as String
@@ -74,32 +74,32 @@ class SettingsViewController: UIViewController {
     UIGraphicsBeginImageContext(imageViewBrush.frame.size)
     var context = UIGraphicsGetCurrentContext()
    
-    CGContextSetLineCap(context, kCGLineCapRound)
-    CGContextSetLineWidth(context, brush)
+    context?.setLineCap(CGLineCap.round)
+    context?.setLineWidth(brush)
    
-    CGContextSetRGBStrokeColor(context, red, green, blue, 1.0)
-    CGContextMoveToPoint(context, 45.0, 45.0)
-    CGContextAddLineToPoint(context, 45.0, 45.0)
-    CGContextStrokePath(context)
+    context?.setStrokeColor(red: red, green: green, blue: blue, alpha: 1.0)
+    context?.move(to: CGPoint(x: 45.0, y: 45.0))
+    context?.addLine(to: CGPoint(x: 45.0, y: 45.0))
+    context?.strokePath()
     imageViewBrush.image = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
    
     UIGraphicsBeginImageContext(imageViewBrush.frame.size)
     context = UIGraphicsGetCurrentContext()
    
-    CGContextSetLineCap(context, kCGLineCapRound)
-    CGContextSetLineWidth(context, 20)
-    CGContextMoveToPoint(context, 45.0, 45.0)
-    CGContextAddLineToPoint(context, 45.0, 45.0)
+    context?.setLineCap(CGLineCap.round)
+    context?.setLineWidth(20)
+    context?.move(to: CGPoint(x: 45.0, y: 45.0))
+    context?.addLine(to: CGPoint(x: 45.0, y: 45.0))
    
-    CGContextSetRGBStrokeColor(context, red, green, blue, opacity)
-    CGContextStrokePath(context)
+    context?.setStrokeColor(red: red, green: green, blue: blue, alpha: opacity)
+    context?.strokePath()
     imageViewOpacity.image = UIGraphicsGetImageFromCurrentImageContext()
    
     UIGraphicsEndImageContext()
   }
   
-  override func viewWillAppear(animated: Bool) {
+  override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
    
     sliderBrush.value = Float(brush)

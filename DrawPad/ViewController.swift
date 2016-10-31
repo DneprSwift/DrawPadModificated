@@ -13,7 +13,7 @@ class ViewController: UIViewController {
   @IBOutlet weak var mainImageView: UIImageView!
   @IBOutlet weak var tempImageView: UIImageView!
 
-  var lastPoint = CGPoint.zeroPoint
+  var lastPoint = CGPoint.zero
   var red: CGFloat = 0.0
   var green: CGFloat = 0.0
   var blue: CGFloat = 0.0
@@ -47,22 +47,22 @@ class ViewController: UIViewController {
 
   // MARK: - Actions
 
-  @IBAction func reset(sender: AnyObject) {
+  @IBAction func reset(_ sender: AnyObject) {
     mainImageView.image = nil
   }
 
-  @IBAction func share(sender: AnyObject) {
+  @IBAction func share(_ sender: AnyObject) {
     UIGraphicsBeginImageContext(mainImageView.bounds.size)
-    mainImageView.image?.drawInRect(CGRect(x: 0, y: 0, 
+    mainImageView.image?.draw(in: CGRect(x: 0, y: 0, 
       width: mainImageView.frame.size.width, height: mainImageView.frame.size.height))
     let image = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
      
     let activity = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-    presentViewController(activity, animated: true, completion: nil)
+    present(activity, animated: true, completion: nil)
   }
   
-  @IBAction func pencilPressed(sender: AnyObject) {
+  @IBAction func pencilPressed(_ sender: AnyObject) {
     
     var index = sender.tag ?? 0
     if index < 0 || index >= colors.count {
@@ -75,33 +75,32 @@ class ViewController: UIViewController {
       opacity = 1.0
     }
   }
-  
-  override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
     swiped = false
-    if let touch = touches.first as? UITouch {
-      lastPoint = touch.locationInView(self.view)
+    if let touch = touches.first {
+      lastPoint = touch.location(in: self.view)
     }
   }
   
-  func drawLineFrom(fromPoint: CGPoint, toPoint: CGPoint) {
+  func drawLineFrom(_ fromPoint: CGPoint, toPoint: CGPoint) {
     
     // 1
     UIGraphicsBeginImageContext(view.frame.size)
     let context = UIGraphicsGetCurrentContext()
-    tempImageView.image?.drawInRect(CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height))
+    tempImageView.image?.draw(in: CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height))
     
     // 2
-    CGContextMoveToPoint(context, fromPoint.x, fromPoint.y)
-    CGContextAddLineToPoint(context, toPoint.x, toPoint.y)
+    context?.move(to: CGPoint(x: fromPoint.x, y: fromPoint.y))
+    context?.addLine(to: CGPoint(x: toPoint.x, y: toPoint.y))
     
     // 3
-    CGContextSetLineCap(context, kCGLineCapRound)
-    CGContextSetLineWidth(context, brushWidth)
-    CGContextSetRGBStrokeColor(context, red, green, blue, 1.0)
-    CGContextSetBlendMode(context, kCGBlendModeNormal)
+    context?.setLineCap(  CGLineCap.round   ) //TODO ? ! 
+    context?.setLineWidth(brushWidth)
+    context?.setStrokeColor(red: red, green: green, blue: blue, alpha: 1.0)
+    context?.setBlendMode(CGBlendMode.normal)
     
     // 4
-    CGContextStrokePath(context)
+    context?.strokePath()
     
     // 5
     tempImageView.image = UIGraphicsGetImageFromCurrentImageContext()
@@ -110,11 +109,11 @@ class ViewController: UIViewController {
     
   }
 
-    override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?)  {
     // 6
     swiped = true
-    if let touch = touches.first as? UITouch {
-      let currentPoint = touch.locationInView(view)
+    if let touch = touches.first  {//
+      let currentPoint = touch.location(in: view)
       drawLineFrom(lastPoint, toPoint: currentPoint)
       
       // 7
@@ -122,7 +121,7 @@ class ViewController: UIViewController {
     }
   }
   
-  override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
+  override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)  {
 
     if !swiped {
       // draw a single point
@@ -131,16 +130,16 @@ class ViewController: UIViewController {
     
     // Merge tempImageView into mainImageView
     UIGraphicsBeginImageContext(mainImageView.frame.size)
-    mainImageView.image?.drawInRect(CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height), blendMode: kCGBlendModeNormal, alpha: 1.0)
-    tempImageView.image?.drawInRect(CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height), blendMode: kCGBlendModeNormal, alpha: opacity)
+    mainImageView.image?.draw(in: CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height), blendMode: CGBlendMode.normal, alpha: 1.0)
+    tempImageView.image?.draw(in: CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height), blendMode: CGBlendMode.normal, alpha: opacity)
     mainImageView.image = UIGraphicsGetImageFromCurrentImageContext()
     UIGraphicsEndImageContext()
     
     tempImageView.image = nil
   }
   
-  override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-    let settingsViewController = segue.destinationViewController as! SettingsViewController
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+    let settingsViewController = segue.destination as! SettingsViewController
     settingsViewController.delegate = self
     settingsViewController.brush = brushWidth
     settingsViewController.opacity = opacity
@@ -152,7 +151,7 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: SettingsViewControllerDelegate {
-  func settingsViewControllerFinished(settingsViewController: SettingsViewController) {
+  func settingsViewControllerFinished(_ settingsViewController: SettingsViewController) {
     self.brushWidth = settingsViewController.brush
     self.opacity = settingsViewController.opacity
     self.red = settingsViewController.red
