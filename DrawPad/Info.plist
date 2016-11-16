@@ -36,5 +36,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>To provide an option of attaching pictures/photos to your form, the application should have an access to Photo Library.</string>
 </dict>
 </plist>

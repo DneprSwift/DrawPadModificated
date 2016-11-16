@@ -7,8 +7,11 @@
 //
 
 import UIKit
+import MobileCoreServices
 
-class ViewController: UIViewController {
+class ViewController: UIViewController
+//UINavigationControllerDelegate, UIImagePickerControllerDelegate
+{
 
   @IBOutlet weak var mainImageView: UIImageView!
   @IBOutlet weak var tempImageView: UIImageView!
@@ -39,7 +42,7 @@ class ViewController: UIViewController {
     super.viewDidLoad()
     // Do any additional setup after loading the view, typically from a nib.
   }
-
+    
   override func didReceiveMemoryWarning() {
     super.didReceiveMemoryWarning()
     // Dispose of any resources that can be recreated.
@@ -63,7 +66,6 @@ class ViewController: UIViewController {
   }
   
   @IBAction func pencilPressed(_ sender: AnyObject) {
-    
     var index = sender.tag ?? 0
     if index < 0 || index >= colors.count {
       index = 0
@@ -94,7 +96,7 @@ class ViewController: UIViewController {
     context?.addLine(to: CGPoint(x: toPoint.x, y: toPoint.y))
     
     // 3
-    context?.setLineCap(  CGLineCap.round   ) //TODO ? ! 
+    context?.setLineCap(  CGLineCap.round   ) //TODO ? !
     context?.setLineWidth(brushWidth)
     context?.setStrokeColor(red: red, green: green, blue: blue, alpha: 1.0)
     context?.setBlendMode(CGBlendMode.normal)
@@ -147,10 +149,30 @@ class ViewController: UIViewController {
     settingsViewController.green = green
     settingsViewController.blue = blue
   }
-  
+    func sfdfd(){
+    }
+    @IBAction func importFrom(_ sender: Any) {
+        self.importFromGaleryAction(sender)
+    }
+    
+}
+
+extension Array//:AiditonalFunctioal
+{
+    func soritngByHaor(){
+        var array:Array<Int>;
+        
+    }
+    
 }
 
 extension ViewController: SettingsViewControllerDelegate {
+    func sfdfd2(){
+        var array = Array<Int>()
+        array.soritngByHaor()
+        
+    }
+
   func settingsViewControllerFinished(_ settingsViewController: SettingsViewController) {
     self.brushWidth = settingsViewController.brush
     self.opacity = settingsViewController.opacity
@@ -158,5 +180,113 @@ extension ViewController: SettingsViewControllerDelegate {
     self.green = settingsViewController.green
     self.blue = settingsViewController.blue
   }
+}
+
+extension ViewController : UINavigationControllerDelegate, UIImagePickerControllerDelegate{
+    @IBAction func importFromGaleryAction(_ sender: Any) {
+        var imagePicker: UIImagePickerController?
+        imagePicker = UIImagePickerController()
+        if let theController = imagePicker{
+            theController.allowsEditing = false
+            theController.sourceType = .photoLibrary
+            theController.delegate = self
+            
+            present(theController, animated: true, completion: nil)
+        }
+        
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController,
+                               didFinishPickingMediaWithInfo info: [String: Any]){
+        
+        print("Picker returned successfully")
+        
+        let mediaType:AnyObject? = info[UIImagePickerControllerMediaType] as AnyObject?
+        
+        if let type:AnyObject = mediaType{
+            
+            if type is String{
+                let stringType = type as! String
+                
+                if stringType == kUTTypeMovie as String{
+                    let urlOfVideo = info[UIImagePickerControllerMediaURL] as? URL
+                    if let url = urlOfVideo{
+                        print("Video URL = \(url)")
+                    }
+                }
+                    
+                else if stringType == kUTTypeImage as String{
+                    /* Let's get the metadata. This is only for images. Not videos */
+                    //~                    let metadata = info[UIImagePickerControllerMediaMetadata]
+                    //                        as? NSDictionary
+                    //                    if let theMetaData = metadata{
+                    let image = info[UIImagePickerControllerOriginalImage]
+                        as? UIImage
+                    if let theImage = image{
+                        
+                        mainImageView.image = theImage
+                        trySaveAtachmentsToPath(theImage, curentFileAtachmentName:"newOneFile")
+                        
+                        print("Image = \(theImage)")
+                    }
+                }
+                //                }
+                
+            }
+        }
+        
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        print("Picker was cancelled")
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    func isCameraAvailable() -> Bool{
+        return UIImagePickerController.isSourceTypeAvailable(.camera)
+    }
+    
+    func cameraSupportsMedia(_ mediaType: String,
+                             sourceType: UIImagePickerControllerSourceType) -> Bool{
+        
+        let availableMediaTypes =
+            UIImagePickerController.availableMediaTypes(for: sourceType) as
+                [String]?
+        
+        if let types = availableMediaTypes{
+            for type in types{
+                if type == mediaType{
+                    return true
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    func doesCameraSupportTakingPhotos() -> Bool{
+        return cameraSupportsMedia(kUTTypeImage as String, sourceType: .camera)
+    }
+    
+    func trySaveAtachmentsToPath(_ theImage:UIImage, curentFileAtachmentName:String){
+        //save image data
+        if let data = UIImageJPEGRepresentation(theImage, 1.0) {//UIImagePNGRepresentation
+            
+            if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                print("directoryes - ",dir)
+                let path = dir.appendingPathComponent(curentFileAtachmentName + ".jpeg")
+                let path03 = dir.appendingPathComponent(curentFileAtachmentName + "_30persents.jpeg")
+                let path03_png = dir.appendingPathComponent(curentFileAtachmentName + "_30persents.png")
+            
+            
+                try? data.write(to: path, options: [.atomic]) //URL(fileURLWithPath: path)
+                
+                try? UIImageJPEGRepresentation(theImage, 0.30)?.write(to: path03, options: [.atomic])
+                try? UIImagePNGRepresentation(theImage)?.write(to: path03_png, options: [.atomic])
+            }
+        }
+    }
+    
 }
 
